@@ -44,7 +44,7 @@ This is a simple brightness control application built with Python and GTK4. It a
 3. Use the slider to adjust the brightness, or click the buttons to quickly set the brightness to the minimum or maximum value.
 4. The brightness level is displayed as a percentage.
 
-<img src=' img/brightness-control.png' width=40%>
+<img src='./img/brightness-control.png' width=40%>
 
 ### Code Structure
 - **`brightness.py`**: The main application code, containing the GUI and logic for detecting monitors and adjusting brightness.
