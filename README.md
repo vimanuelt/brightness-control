@@ -19,7 +19,7 @@ This is a simple brightness control application built with Python and GTK4. It a
 
    On FreeBSD-based systems:
    ```bash
-   sudo pkg install python
+   sudo pkg install python gtk4 xrandr 
    ```
 
 2. Clone the repository:
