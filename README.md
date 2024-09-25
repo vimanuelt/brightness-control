@@ -4,7 +4,7 @@ This is a simple brightness control application built with Python and GTK4. It a
 
 ### Features
 - Select from multiple connected monitors.
-- Adjust brightness using a vertical slider.
+- Adjust brightness using a horizontal slider.
 - Predefined buttons for setting brightness to minimum (20%) or maximum (100%).
 
 ### Prerequisites
