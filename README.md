@@ -56,4 +56,3 @@ This is a simple brightness control application built with Python and GTK4. It a
 ### License
 This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE) file for details.
 
-eel free to customize the repository name, screenshot, and any other sections according to your specific needs!
