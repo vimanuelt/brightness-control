@@ -27,7 +27,7 @@ This is a simple brightness control application built with Python and GTK4. It a
    git clone https://github.com/vimanuelt/brightness-control.git
    cd brightness-control
    ```
-3. Make it executable
+3. Make it executable:
    ```bash
    chmod +x brightness-control.py
    ```
