@@ -17,14 +17,9 @@ This is a simple brightness control application built with Python and GTK4. It a
 
 1. Install the required packages:
 
-   On Debian/Ubuntu-based systems:
+   On FreeBSD-based systems:
    ```bash
-   sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-4.0 x11-xserver-utils
-   ```
-
-   On Fedora:
-   ```bash
-   sudo dnf install python3-gobject gtk4 xrandr
+   sudo pkg install python
    ```
 
 2. Clone the repository:
@@ -32,8 +27,12 @@ This is a simple brightness control application built with Python and GTK4. It a
    git clone https://github.com/vimanuelt/brightness-control.git
    cd brightness-control
    ```
+3. Make it executable
+   ```bash
+   chmod +x brightness-control.py
+   ```
 
-3. Run the application:
+4. Run the application:
    ```bash
    ./brightness-control.py
    ```
