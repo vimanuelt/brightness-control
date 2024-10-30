@@ -24,7 +24,7 @@ class BrightnessControl:
 
     def on_activate(self, app):
         window = self.new_window(app)
-        window.set_title("Brightness and Contrast Control")
+        window.set_title("Brightness Control")
         window.set_default_size(300, 400)  # Increased window size to fit additional controls
 
         # Create a temporary file for CSS
