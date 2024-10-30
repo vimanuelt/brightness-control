@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.11
+#!/usr/bin/env python3
 
 import gi
 import subprocess
@@ -11,9 +11,11 @@ from gi.repository import Gtk, Gio, Gdk
 class BrightnessControl:
     def __init__(self):
         self.brightness = 0
+        self.gamma = 1.0  # Default gamma value
         self.video_outputs = self.detect_video_outputs()  # Detect multiple video outputs
         self.video_output = self.video_outputs[0] if self.video_outputs else None
         self.brightness = self.get_brightness() or 0.99  # Set initial brightness
+        self.gamma = self.get_gamma() or 1.0  # Set initial gamma
 
     def run(self):
         app = Gtk.Application(application_id="com.example.brightness-control")
@@ -22,10 +24,9 @@ class BrightnessControl:
 
     def on_activate(self, app):
         window = self.new_window(app)
-        window.set_title("Brightness control")
-        window.set_default_size(300, 250)  # Set narrower window size
+        window.set_title("Brightness and Contrast Control")
+        window.set_default_size(300, 400)  # Increased window size to fit additional controls
 
-        # Create a temporary file for CSS
         with NamedTemporaryFile(delete=False, suffix=".css") as css_file:
             css_file.write(b"""
             window {
@@ -56,11 +57,9 @@ class BrightnessControl:
             """)
             css_file_name = css_file.name
 
-        # Load CSS from the temporary file
         css_provider = Gtk.CssProvider()
         css_provider.load_from_file(Gio.File.new_for_path(css_file_name))
 
-        # Add the CSS provider to the display
         display = Gdk.Display.get_default()
         Gtk.StyleContext.add_provider_for_display(display, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
@@ -71,7 +70,7 @@ class BrightnessControl:
         vbox.set_margin_start(20)
         vbox.set_margin_end(20)
 
-        # Gtk.DropDown for selecting video output using Gtk.StringList
+        # Gtk.DropDown for selecting video output
         video_list = Gtk.StringList.new(self.video_outputs)
         self.output_dropdown = Gtk.DropDown(model=video_list)
 
@@ -79,7 +78,7 @@ class BrightnessControl:
         if self.video_outputs:
             self.output_dropdown.set_selected(0)
 
-        self.output_dropdown.set_size_request(150, -1)  # Explicitly set the width
+        self.output_dropdown.set_size_request(150, -1)
         self.output_dropdown.connect("notify::selected", self.on_output_changed)
 
         # Video output label
@@ -90,13 +89,13 @@ class BrightnessControl:
         self.brightness_label = self.new_label(f"Brightness: {int(self.brightness * 100)}%")
         vbox.append(self.brightness_label)
 
-        # Horizontal box for buttons and scale
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-
+        # Brightness control with buttons and scale
+        hbox_brightness = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        
         min_button = Gtk.Button(label="Min")
         decrease_button = Gtk.Button(label="-")
         brightness_scale = self.new_scale()
-        brightness_scale.set_range(0.2, 1.0)  # Set the range to 20% - 100%
+        brightness_scale.set_range(0.2, 1.0)
         brightness_scale.set_value(self.brightness)
         increase_button = Gtk.Button(label="+")
         max_button = Gtk.Button(label="Max")
@@ -107,14 +106,40 @@ class BrightnessControl:
         increase_button.connect("clicked", self.increase_brightness, brightness_scale)
         max_button.connect("clicked", self.set_max_brightness, brightness_scale)
 
-        # Add buttons and scale to the horizontal box
-        hbox.append(min_button)
-        hbox.append(decrease_button)
-        hbox.append(brightness_scale)
-        hbox.append(increase_button)
-        hbox.append(max_button)
+        hbox_brightness.append(min_button)
+        hbox_brightness.append(decrease_button)
+        hbox_brightness.append(brightness_scale)
+        hbox_brightness.append(increase_button)
+        hbox_brightness.append(max_button)
+        vbox.append(hbox_brightness)
 
-        vbox.append(hbox)
+        # Gamma (contrast) label and scale
+        self.gamma_label = self.new_label(f"Contrast (Gamma): {self.gamma:.2f}")
+        vbox.append(self.gamma_label)
+
+        # Gamma control with buttons and scale
+        hbox_gamma = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        
+        min_gamma_button = Gtk.Button(label="Min")
+        decrease_gamma_button = Gtk.Button(label="-")
+        gamma_scale = self.new_scale()
+        gamma_scale.set_range(0.5, 3.0)  # Gamma range for contrast adjustment
+        gamma_scale.set_value(self.gamma)
+        increase_gamma_button = Gtk.Button(label="+")
+        max_gamma_button = Gtk.Button(label="Max")
+
+        min_gamma_button.connect("clicked", self.set_min_gamma, gamma_scale)
+        decrease_gamma_button.connect("clicked", self.decrease_gamma, gamma_scale)
+        gamma_scale.connect("value-changed", self.gamma_value_changed)
+        increase_gamma_button.connect("clicked", self.increase_gamma, gamma_scale)
+        max_gamma_button.connect("clicked", self.set_max_gamma, gamma_scale)
+
+        hbox_gamma.append(min_gamma_button)
+        hbox_gamma.append(decrease_gamma_button)
+        hbox_gamma.append(gamma_scale)
+        hbox_gamma.append(increase_gamma_button)
+        hbox_gamma.append(max_gamma_button)
+        vbox.append(hbox_gamma)
 
         window.set_child(vbox)
         window.present()
@@ -156,6 +181,9 @@ class BrightnessControl:
 
         return None
 
+    def get_gamma(self):
+        return self.gamma
+
     def set_brightness(self, brightness):
         if self.video_output:
             try:
@@ -163,33 +191,60 @@ class BrightnessControl:
             except subprocess.CalledProcessError as e:
                 print("Failed to set brightness: {}".format(e))
 
+    def set_gamma(self, gamma):
+        if self.video_output:
+            try:
+                subprocess.run(['xrandr', '--output', self.video_output, '--gamma', f'{gamma}:{gamma}:{gamma}'], check=True)
+            except subprocess.CalledProcessError as e:
+                print("Failed to set gamma: {}".format(e))
+
     def on_output_changed(self, combo, _):
-        # Update the selected video output
         selected_index = combo.get_selected()
         self.video_output = self.video_outputs[selected_index]
-        self.brightness = self.get_brightness() or 0.99  # Update brightness for new output
-        self.brightness_label.set_text(f"Brightness: {int(self.brightness * 100)}%")  # Update brightness label
+        self.brightness = self.get_brightness() or 0.99
+        self.brightness_label.set_text(f"Brightness: {int(self.brightness * 100)}%")
 
     def scale_value_changed(self, scale, _):
         self.brightness = scale.get_value()
         self.set_brightness(self.brightness)
         self.brightness_label.set_text(f"Brightness: {int(self.brightness * 100)}%")
 
+    def gamma_value_changed(self, scale):
+        self.gamma = scale.get_value()
+        self.set_gamma(self.gamma)
+        self.gamma_label.set_text(f"Contrast (Gamma): {self.gamma:.2f}")
+
     def decrease_brightness(self, button, scale):
         current_value = scale.get_value()
-        new_value = max(0.2, current_value - 0.05)  # Decrease by 5%, min 20%
+        new_value = max(0.2, current_value - 0.05)
         scale.set_value(new_value)
 
     def increase_brightness(self, button, scale):
         current_value = scale.get_value()
-        new_value = min(1.0, current_value + 0.05)  # Increase by 5%, max 100%
+        new_value = min(1.0, current_value + 0.05)
         scale.set_value(new_value)
 
     def set_min_brightness(self, button, scale):
-        scale.set_value(0.2)  # Set to 20% brightness
+        scale.set_value(0.2)
 
     def set_max_brightness(self, button, scale):
-        scale.set_value(1.0)  # Set to 100% brightness
+        scale.set_value(1.0)
+
+    def decrease_gamma(self, button, scale):
+        current_value = scale.get_value()
+        new_value = max(0.5, current_value - 0.1)
+        scale.set_value(new_value)
+
+    def increase_gamma(self, button, scale):
+        current_value = scale.get_value()
+        new_value = min(3.0, current_value + 0.1)
+        scale.set_value(new_value)
+
+    def set_min_gamma(self, button, scale):
+        scale.set_value(0.5)
+
+    def set_max_gamma(self, button, scale):
+        scale.set_value(3.0)
 
     def new_window(self, app):
         window = Gtk.ApplicationWindow(application=app)
@@ -197,11 +252,11 @@ class BrightnessControl:
 
     def new_label(self, text):
         label = Gtk.Label(label=text)
-        label.set_halign(Gtk.Align.CENTER)  # Center-align the label
+        label.set_halign(Gtk.Align.CENTER)
         return label
 
     def new_scale(self):
-        scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL)  # Horizontal scale
+        scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL)
         scale.set_digits(2)
         scale.set_value_pos(Gtk.PositionType.RIGHT)
         return scale
@@ -212,4 +267,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
