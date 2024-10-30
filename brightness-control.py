@@ -27,6 +27,7 @@ class BrightnessControl:
         window.set_title("Brightness and Contrast Control")
         window.set_default_size(300, 400)  # Increased window size to fit additional controls
 
+        # Create a temporary file for CSS
         with NamedTemporaryFile(delete=False, suffix=".css") as css_file:
             css_file.write(b"""
             window {
@@ -57,9 +58,11 @@ class BrightnessControl:
             """)
             css_file_name = css_file.name
 
+        # Load CSS from the temporary file
         css_provider = Gtk.CssProvider()
         css_provider.load_from_file(Gio.File.new_for_path(css_file_name))
 
+        # Add the CSS provider to the display
         display = Gdk.Display.get_default()
         Gtk.StyleContext.add_provider_for_display(display, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
@@ -194,7 +197,10 @@ class BrightnessControl:
     def set_gamma(self, gamma):
         if self.video_output:
             try:
-                subprocess.run(['xrandr', '--output', self.video_output, '--gamma', f'{gamma}:{gamma}:{gamma}'], check=True)
+                # Reapply the current brightness alongside gamma adjustment
+                subprocess.run(['xrandr', '--output', self.video_output, 
+                                '--brightness', str(self.brightness), 
+                                '--gamma', f'{gamma}:{gamma}:{gamma}'], check=True)
             except subprocess.CalledProcessError as e:
                 print("Failed to set gamma: {}".format(e))
 
