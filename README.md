@@ -1,58 +1,142 @@
-## Brightness and Contrast Control Application
+# Brightness Control
 
-This is a simple brightness and contrast control application built with Python and GTK4. It allows users to adjust the brightness of their connected monitors using a graphical interface. The application detects connected displays, and users can select a display and adjust the brightness using a slider or predefined buttons.
+`brightness-control` is a simple Python application designed for GhostBSD to adjust screen brightness using the `xrandr` utility. It provides a lightweight graphical interface built with GTK4.
 
-### Features
-- Select from multiple connected monitors.
-- Adjust brightness using a horizontal slider.
-- Predefined buttons for setting brightness to minimum (20%) or maximum (100%).
+---
+
+## Features
+
+- Adjust brightness for individual displays.
+- Automatically detects connected displays.
+- Lightweight and optimized for GhostBSD.
+
+---
+
+## Installation
+
+Follow these steps to install and set up the application:
 
 ### Prerequisites
-- **Python 3.11+**
-- **GTK 4.0+**
-- The `gi` Python package (GObject Introspection).
-- `xrandr` installed on your system (used for detecting monitors and adjusting brightness).
 
-### Installation
+Ensure the following dependencies are installed on your GhostBSD system:
+- `python`
+- `py311-pygobject`
+- `gtk4`
+- `xrandr`
 
-1. Install the required packages:
+### Steps
 
-   On FreeBSD-based systems:
-   ```bash
-   sudo pkg install python py311-gobject3 gtk4 xrandr 
-   ```
+1. **Clone the Repository**
 
-2. Clone the repository:
+   Open a terminal and run:
    ```bash
    git clone https://github.com/vimanuelt/brightness-control.git
    cd brightness-control
    ```
-3. Make it executable:
+
+2. **Install the Application**
+
+   Run the following command to install dependencies, build the application, and install the binary:
    ```bash
-   chmod +x brightness-control.py
+   make install
    ```
 
-4. Run the application:
+   This will:
+   - Install the required system dependencies using `pkg`.
+   - Build a standalone executable using PyInstaller.
+   - Install the binary to `/usr/local/bin/`.
+
+---
+
+## Usage
+
+Once installed, you can run the application from anywhere using:
+```bash
+brightness-control
+```
+
+### Adjusting Brightness
+
+1. Open the application by running `brightness-control`.
+2. Select a display (if multiple are connected).
+3. Use the slider or input field to set the desired brightness level.
+
+---
+
+## Uninstallation
+
+To remove the installed binary from your system, run:
+```bash
+make uninstall
+```
+
+This will delete the `brightness-control` binary from `/usr/local/bin`.
+
+---
+
+## Development
+
+### Building from Source
+
+If you want to modify the application or manually build it:
+1. Clone the repository:
    ```bash
-   ./brightness-control.py
+   git clone https://github.com/vimanuelt/brightness-control.git
+   cd brightness-control
+   ```
+2. Install dependencies:
+   ```bash
+   make install
+   ```
+3. Build the executable:
+   ```bash
+   make build
    ```
 
-### Usage
-1. Upon starting the application, it will automatically detect connected monitors via `xrandr`.
-2. Select a monitor from the dropdown list.
-3. Use the slider to adjust the brightness or contrast, or click the buttons to quickly set the brightness to the minimum or maximum value.
+The built executable will be located in the `dist/` directory.
 
-<img src='./img/brightness-control.png' width=30%>
+### Cleaning Up
 
-### Code Structure
-- **`brightness.py`**: The main application code, containing the GUI and logic for detecting monitors and adjusting both brightness and contrast.
-- **CSS Styling**: The application uses embedded CSS for styling, located directly in the code.
+To remove build artifacts and the virtual environment:
+```bash
+make clean
+```
 
-### How It Works
-1. **Monitor Detection**: The application runs the `xrandr` command to detect connected displays and their current brightness levels.
-2. **Brightness Adjustment**: Brightness can be adjusted using the `xrandr` command, specifying the selected output and desired brightness level.
-3. **Contrast Adjustment**: Contrast can be adjusted using the `xrandr --gamma` command, specifying the selected output and desired contrast level.
+---
 
-### License
-This project is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE) file for details.
+## Troubleshooting
+
+1. **Brightness Changes Not Applied**:
+   - Ensure your display supports brightness adjustments using `xrandr`.
+   - Verify the required drivers for your hardware are installed.
+
+2. **Missing Dependencies**:
+   - Reinstall the required packages:
+     ```bash
+     sudo pkg install python py311-pygobject gtk4 xrandr
+     ```
+
+3. **Permission Issues**:
+   - Run the application as a user with sufficient permissions to manage display settings.
+
+---
+
+## License
+
+This project is licensed under the **BSD 3-Clause License**. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Contributing
+
+Contributions are welcome! Please:
+- Open an issue to report bugs or suggest features.
+- Submit pull requests to improve the project.
+
+---
+
+## Acknowledgments
+
+- Built with Python, GTK4, and `xrandr`.
+- Designed for GhostBSD users seeking a lightweight brightness control solution.
 
